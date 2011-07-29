@@ -16,6 +16,10 @@ type Word struct {
 }
 
 func getWikitext(word string) string {
+	word_re := regexp.MustCompile("^[ a-zA-Z]+$")
+	if word_re.MatchString(word)==false {
+		return ""
+	}
 	cache_file := path.Join("wiktionary", word)
 	buf, err := ioutil.ReadFile(cache_file)
 	if err!=nil {
@@ -36,14 +40,15 @@ func getWikitext(word string) string {
 	return string(buf)
 }
 
-func PartsOfSpeech(word string) {
-	log.Print("Finding parts of speech for: " + word)
+func PartsOfSpeech(word string) []string {
+	pos := make([]string, 0, 5)
 	s := getWikitext(word)
 	template := regexp.MustCompile("{{([^}\\|]+)(\\|([^}]+))?}}")
 	templates := template.FindAllStringSubmatch(s, -1)
 	for _, t := range templates {
 		if strings.HasPrefix(t[1], "en-") {
-			log.Print(t[1])
+			pos = append(pos, t[1])
 		}
 	}
+	return pos
 }
